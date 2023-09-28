@@ -1,0 +1,33 @@
+button {
+  width: 100px;
+  height: 40px;
+}
+
+.header_div {
+  display: flex;
+  justify-content: space-around;
+}
+
+.search_div-button {
+  height: 22px;
+}
+
+.bankBlock {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px;
+  width: 200px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.hero {
+  display: flex;
+}
+
+.manage_cars {
+  padding-top: 20px;
+  padding-left: 175px;
+  padding-right: 100px;
+}
