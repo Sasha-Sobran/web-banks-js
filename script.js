@@ -1,37 +1,21 @@
 let isSorted = false;
 
-const allBanks = [
-  {
-    title: "bpolybank",
-    countOfClients: 12,
-    countOfCredits: 7,
-  },
-  {
-    title: "cpolybank2",
-    countOfClients: 112,
-    countOfCredits: 73,
-  },
-  {
-    title: "apolybank3",
-    countOfClients: 1245,
-    countOfCredits: 714,
-  },
-  {
-    title: "apolybank4",
-    countOfClients: 1245,
-    countOfCredits: 714,
-  },
-  {
-    title: "apolybank6",
-    countOfClients: 1245,
-    countOfCredits: 714,
-  },
-  {
-    title: "apolybank5",
-    countOfClients: 1245,
-    countOfCredits: 714,
-  },
-];
+let allBanks = [];
+
+function back() {
+  window.location.href = "banks.html";
+}
+
+function loadBanksFromLocalStorage() {
+  const storedBanks = localStorage.getItem("banks");
+  if (storedBanks) {
+    allBanks = JSON.parse(storedBanks);
+  }
+}
+
+function saveBanksToLocalStorage() {
+  localStorage.setItem("banks", JSON.stringify(allBanks));
+}
 
 function reloadDiv(banks) {
   const contentDiv = document.getElementById("content");
@@ -45,7 +29,7 @@ function reloadDiv(banks) {
               <p>clients: ${bank.countOfClients}</p>
               <p>credits: ${bank.countOfCredits}<p>
               <button class="delete_button" onclick="deleteBank(${index})">Delete</button>
-              <button class="edit_button" onclick="editButton(${index})">Edit</button>
+              <button class="edit_button" onclick="editBank(${index})">Edit</button>
               `;
       contentDiv.appendChild(bankDiv);
     });
@@ -55,15 +39,57 @@ function reloadDiv(banks) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  loadBanksFromLocalStorage();
   reloadDiv(allBanks);
 });
 
 function deleteBank(index) {
   allBanks.splice(index, 1);
+  saveBanksToLocalStorage();
   reloadDiv(allBanks);
 }
 
-function editBank(index) {}
+let edit_index = 0;
+
+function editBank(index) {
+  window.location.href = "edit_page.html";
+  edit_index = index;
+}
+
+function updateBank(index) {
+  const countOfClients = document.getElementById("clients_input").value;
+  const countOfCredits = document.getElementById("credits_input").value;
+  const name = document.getElementById("name_input").value;
+
+  const newBank = {
+    title: name,
+    countOfClients: countOfClients,
+    countOfCredits: countOfCredits,
+  };
+
+  allBanks.splice(index, 1);
+  allBanks.push(newBank);
+
+  saveBanksToLocalStorage();
+  window.location.href = "banks.html";
+  reloadDiv(allBanks);
+}
+
+function createBank() {
+  const countOfClients = document.getElementById("clients_input2").value;
+  const countOfCredits = document.getElementById("credits_input2").value;
+  const name = document.getElementById("name_input2").value;
+  const newBank = {
+    title: name,
+    countOfClients: countOfClients,
+    countOfCredits: countOfCredits,
+  };
+
+  allBanks.push(newBank);
+  saveBanksToLocalStorage();
+  window.location.href = "banks.html";
+  reloadDiv(allBanks);
+}
 
 function sortBanksByName() {
   if (!isSorted) {
@@ -90,8 +116,8 @@ function allClientsCount() {
 function searchBanks() {
   const inputContainer = document.getElementById("inputId").value.toLowerCase();
 
-  const filteredBanks = allBanks.filter(function (book) {
-    return book.title.toLocaleLowerCase().includes(inputContainer);
+  const filteredBanks = allBanks.filter(function (bank) {
+    return bank.title.toLowerCase().includes(inputContainer);
   });
   reloadDiv(filteredBanks);
 }
