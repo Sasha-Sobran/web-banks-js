@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="/script.js"></script>
     <title>Document</title>
   </head>
 
@@ -19,6 +19,7 @@
           <button class="search_div-button" onclick="searchBanks()">
             Search
           </button>
+          <button class="search_div-button" onclick="clear_filter()">Clear</button>
         </div>
       </div>
     </header>
@@ -34,3 +35,38 @@
     </div>
   </body>
 </html>
+
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="close_modal()">&times;</span>
+    <div class="text_div">Edit your bank</div>
+    <div class="input_div">
+      <div>
+        Введіть назву банку
+        <input id="name_input" placeholder="Введіть назву банку" />
+      </div>
+      <div>
+        Введіть кількість клієнтів
+        <input
+          type="number"
+          min="0"
+          id="clients_input"
+          placeholder="Введіть кількість клієнтів"
+        />
+      </div>
+      <div>
+        Введіть кількість кредитів
+        <input
+          type="number"
+          min="0"
+          id="credits_input"
+          placeholder="Введіть кількість кредитів"
+        />
+      </div>
+    </div>
+    <div class="button_div">
+      <button onclick="close_modal()">back</button>
+      <button onclick="updateBank()">EDIT</button>
+    </div>
+  </div>
+</div>
