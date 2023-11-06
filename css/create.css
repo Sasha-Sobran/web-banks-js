@@ -1,0 +1,44 @@
+body {
+  display: flex;
+  justify-content: center;
+}
+
+div {
+  width: 400px;
+}
+
+input {
+  width: 400px;
+  height: 25px;
+}
+
+button {
+    height: 20px;
+    width: 100px;
+}
+
+.text_div {
+    padding-left: 130px;
+    font-size: 20px;
+}
+
+.button_div {
+    display: flex;
+    justify-content: space-between;
+}
+
+.hero {
+  padding-top: 180px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.input_div {
+  height: 200px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}

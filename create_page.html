@@ -3,14 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/create.css" />
     <script src="script.js"></script>
     <title>Document</title>
   </head>
   <body>
-    <button onclick="back()">back</button>
-    <input type="count_of_clients" id="clients_input2" />
-    <input type="count_of_credits" id="credits_input2" />
-    <input type="name" id="name_input2" />
-    <button onclick="createBank()">CREATE</button>
+    <div class="hero">
+      <div class="text_div">Create your bank</div>
+      <div class="input_div">
+        <input id="name_input2" placeholder="Введіть назву банку" />
+          <input
+          type="number"
+          min="0"
+          id="clients_input2"
+          placeholder="Введіть кількість клієнтів"
+        />
+        <input
+          type="number"
+          id="credits_input2"
+          placeholder="Введіть кількість кредитів"
+        />
+      </div>
+      <div class="button_div">
+        <button onclick="back()">back</button>
+        <button onclick="createBank()">CREATE</button>
+      </div>
+    </div>
   </body>
 </html>

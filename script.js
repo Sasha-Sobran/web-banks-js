@@ -1,123 +1,165 @@
 let isSorted = false;
-
 let allBanks = [];
 
-function back() {
-  window.location.href = "banks.html";
-}
+const url = "http://localhost:3000/";
 
-function loadBanksFromLocalStorage() {
-  const storedBanks = localStorage.getItem("banks");
-  if (storedBanks) {
-    allBanks = JSON.parse(storedBanks);
-  }
-}
-
-function saveBanksToLocalStorage() {
-  localStorage.setItem("banks", JSON.stringify(allBanks));
-}
-
-function reloadDiv(banks) {
-  const contentDiv = document.getElementById("content");
-  contentDiv.innerHTML = "";
-  if (banks?.length !== 0) {
-    banks.forEach(function (bank, index) {
-      const bankDiv = document.createElement("div");
-      bankDiv.classList.add("bankBlock");
-      bankDiv.innerHTML = `
-              <h3>${bank.title}</h3>
-              <p>clients: ${bank.countOfClients}</p>
-              <p>credits: ${bank.countOfCredits}<p>
-              <button class="delete_button" onclick="deleteBank(${index})">Delete</button>
-              <button class="edit_button" onclick="editBank(${index})">Edit</button>
-              `;
-      contentDiv.appendChild(bankDiv);
-    });
-  } else {
-    contentDiv.innerHTML = "<p>No matching banks found.</p>";
-  }
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  loadBanksFromLocalStorage();
-  reloadDiv(allBanks);
+document.addEventListener("DOMContentLoaded", () => {
+  fetchDataAndReload();
 });
 
-function deleteBank(index) {
-  allBanks.splice(index, 1);
-  saveBanksToLocalStorage();
-  reloadDiv(allBanks);
+function fetchDataAndReload() {
+  fetch(`http://127.0.0.1:5000/get`)
+    .then((response) => response.json())
+    .then((data) => {
+      allBanks = data;
+      reloadDiv(data);
+    })
+    .catch((error) => console.error("Error loading data:", error));
 }
 
-let edit_index = 0;
+function deleteBank(index) {
+  fetch(`${url}delete/${allBanks[index].id}`, {
+    method: "DELETE",
+  })
+    .then((response) => {
+      if (response.ok) return response.json();
+      throw new Error("Error deleting bank");
+    })
+    .then(() => fetchDataAndReload())
+    .catch((error) => console.error(error));
+}
 
 function editBank(index) {
-  window.location.href = "edit_page.html";
+  const modal = document.getElementById("myModal");
+  const bank = allBanks[index];
+  document.getElementById("clients_input").value = bank.count_of_clients;
+  document.getElementById("credits_input").value = bank.count_of_credits;
+  document.getElementById("name_input").value = bank.name;
+  modal.style.display = "block";
   edit_index = index;
 }
 
-function updateBank(index) {
+function updateBank() {
   const countOfClients = document.getElementById("clients_input").value;
   const countOfCredits = document.getElementById("credits_input").value;
-  const name = document.getElementById("name_input").value;
+  const title = document.getElementById("name_input").value;
+
+  if (
+    countOfClients === "" ||
+    countOfCredits === "" ||
+    (title === "" && countOfClients >= 0 && countOfCredits >= 0)
+  ) {
+    window.alert("Input is wrong");
+    return;
+  }
 
   const newBank = {
-    title: name,
-    countOfClients: countOfClients,
-    countOfCredits: countOfCredits,
+    bank_name: title,
+    count_of_clients: countOfClients,
+    count_of_credits: countOfCredits,
   };
 
-  allBanks.splice(index, 1);
-  allBanks.push(newBank);
-
-  saveBanksToLocalStorage();
-  window.location.href = "banks.html";
-  reloadDiv(allBanks);
+  fetch(`${url}update/${allBanks[edit_index].id}`, {
+    method: "PUT",
+    body: JSON.stringify(newBank),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((response) => response.json())
+    .then(() => {
+      closeModal();
+      fetchDataAndReload();
+    })
+    .catch((error) => console.error("Error editing bank:", error));
 }
 
 function createBank() {
   const countOfClients = document.getElementById("clients_input2").value;
   const countOfCredits = document.getElementById("credits_input2").value;
-  const name = document.getElementById("name_input2").value;
+  const title = document.getElementById("name_input2").value;
+
+  if (
+    countOfClients === "" ||
+    countOfCredits === "" ||
+    (title === "" && countOfClients >= 0 && countOfCredits >= 0)
+  ) {
+    window.alert("Input is wrong");
+    return;
+  }
+
   const newBank = {
-    title: name,
-    countOfClients: countOfClients,
-    countOfCredits: countOfCredits,
+    bank_name: title,
+    count_of_clients: countOfClients,
+    count_of_credits: countOfCredits,
   };
 
-  allBanks.push(newBank);
-  saveBanksToLocalStorage();
-  window.location.href = "banks.html";
-  reloadDiv(allBanks);
+  fetch(`${url}insert`, {
+    method: "POST",
+    body: JSON.stringify(newBank),
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((response) => response.json())
+    .then(() => {
+      window.location.href = "banks.html";
+      fetchDataAndReload();
+    })
+    .catch((error) => console.error("Error adding bank:", error));
 }
 
 function sortBanksByName() {
-  if (!isSorted) {
-    const sortedBanks = allBanks.slice();
-    reloadDiv(sortedBanks.sort((a, b) => (a.title > b.title ? 1 : -1)));
-    isSorted = true;
-  } else {
-    reloadDiv(allBanks);
-    isSorted = false;
-  }
+  isSorted = !isSorted;
+  const sortedBanks = allBanks
+    .slice()
+    .sort((a, b) =>
+      isSorted ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+    );
+  reloadDiv(sortedBanks);
 }
 
 function allClientsCount() {
-  let countOfAllClients = 0;
-  allBanks.forEach(function (bank) {
-    countOfAllClients += bank.countOfClients;
-  });
+  const countOfAllClients = allBanks.reduce(
+    (total, bank) => total + parseInt(bank.count_of_clients),
+    0
+  );
   const countContainer = document.getElementById("counter");
-  countContainer.innerHTML = `
-    <p>Count of all clients: ${countOfAllClients}</p>
-  `;
+  countContainer.innerHTML = `<p>Count of all clients: ${countOfAllClients}</p>`;
 }
 
 function searchBanks() {
   const inputContainer = document.getElementById("inputId").value.toLowerCase();
-
-  const filteredBanks = allBanks.filter(function (bank) {
-    return bank.title.toLowerCase().includes(inputContainer);
-  });
+  const filteredBanks = allBanks.filter((bank) =>
+    bank.name.toLowerCase().includes(inputContainer)
+  );
   reloadDiv(filteredBanks);
+}
+
+function reloadDiv(banks) {
+  const contentDiv = document.getElementById("content");
+  contentDiv.innerHTML =
+    banks.length > 0
+      ? banks.map(
+          (bank, index) => `
+      <div class="bankBlock">
+        <h3>Name: ${bank.name}</h3>
+        <p>clients: ${bank.count_of_clients}</p>
+        <p>credits: ${bank.count_of_credits}</p>
+        <button class="delete_button" onclick="deleteBank(${index})">Delete</button>
+        <button class="edit_button" onclick="editBank(${index})">Edit</button>
+      </div>
+    `
+        ).join("")
+      : "<p>No matching banks found.</p>";
+}
+
+function back() {
+  window.location.href = "banks.html";
+}
+
+function closeModal() {
+  var modal = document.getElementById("myModal");
+  modal.style.display = "none";
+}
+
+function clearFilter() {
+  document.getElementById("inputId").value = "";
+  fetchDataAndReload();
 }
