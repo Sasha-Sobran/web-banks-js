@@ -1,12 +1,14 @@
 let isSorted = false;
 let allBanks = [];
 
+const url = "http://localhost:3000/";
+
 document.addEventListener("DOMContentLoaded", () => {
   fetchDataAndReload();
 });
 
 function fetchDataAndReload() {
-  fetch("http://127.0.0.1:5000/get")
+  fetch(`http://127.0.0.1:5000/get`)
     .then((response) => response.json())
     .then((data) => {
       allBanks = data;
@@ -16,7 +18,7 @@ function fetchDataAndReload() {
 }
 
 function deleteBank(index) {
-  fetch(`http://127.0.0.1:5000/delete/${allBanks[index].id}`, {
+  fetch(`${url}delete/${allBanks[index].id}`, {
     method: "DELETE",
   })
     .then((response) => {
@@ -32,7 +34,7 @@ function editBank(index) {
   const bank = allBanks[index];
   document.getElementById("clients_input").value = bank.count_of_clients;
   document.getElementById("credits_input").value = bank.count_of_credits;
-  document.getElementById("name_input").value = bank.bank_name;
+  document.getElementById("name_input").value = bank.name;
   modal.style.display = "block";
   edit_index = index;
 }
@@ -57,14 +59,14 @@ function updateBank() {
     count_of_credits: countOfCredits,
   };
 
-  fetch(`http://127.0.0.1:5000/change/${allBanks[edit_index].id}`, {
+  fetch(`${url}update/${allBanks[edit_index].id}`, {
     method: "PUT",
     body: JSON.stringify(newBank),
     headers: { "Content-Type": "application/json" },
   })
     .then((response) => response.json())
     .then(() => {
-      window.location.href = "banks.html";
+      closeModal();
       fetchDataAndReload();
     })
     .catch((error) => console.error("Error editing bank:", error));
@@ -90,7 +92,7 @@ function createBank() {
     count_of_credits: countOfCredits,
   };
 
-  fetch("http://127.0.0.1:5000/insert", {
+  fetch(`${url}insert`, {
     method: "POST",
     body: JSON.stringify(newBank),
     headers: { "Content-Type": "application/json" },
@@ -108,9 +110,7 @@ function sortBanksByName() {
   const sortedBanks = allBanks
     .slice()
     .sort((a, b) =>
-      isSorted
-        ? a.bank_name.localeCompare(b.bank_name)
-        : b.bank_name.localeCompare(a.bank_name)
+      isSorted ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
     );
   reloadDiv(sortedBanks);
 }
@@ -127,7 +127,7 @@ function allClientsCount() {
 function searchBanks() {
   const inputContainer = document.getElementById("inputId").value.toLowerCase();
   const filteredBanks = allBanks.filter((bank) =>
-    bank.bank_name.toLowerCase().includes(inputContainer)
+    bank.name.toLowerCase().includes(inputContainer)
   );
   reloadDiv(filteredBanks);
 }
@@ -139,14 +139,14 @@ function reloadDiv(banks) {
       ? banks.map(
           (bank, index) => `
       <div class="bankBlock">
-        <h3>Name: ${bank.bank_name}</h3>
+        <h3>Name: ${bank.name}</h3>
         <p>clients: ${bank.count_of_clients}</p>
         <p>credits: ${bank.count_of_credits}</p>
         <button class="delete_button" onclick="deleteBank(${index})">Delete</button>
         <button class="edit_button" onclick="editBank(${index})">Edit</button>
       </div>
     `
-        )
+        ).join("")
       : "<p>No matching banks found.</p>";
 }
 
@@ -154,12 +154,12 @@ function back() {
   window.location.href = "banks.html";
 }
 
-function close_modal() {
+function closeModal() {
   var modal = document.getElementById("myModal");
   modal.style.display = "none";
 }
 
-function clear_filter() {
+function clearFilter() {
   document.getElementById("inputId").value = "";
   fetchDataAndReload();
 }
